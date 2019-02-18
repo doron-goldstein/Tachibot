@@ -47,7 +47,7 @@ class TachiBoti(discord.Client):
                         pass
                 await message.channel.send(fmt)
             else:
-                embed = await self.format_embed(m[0].group(1))
+                embed = await self.format_embed(m[0])
                 if not embed:
                     return
                 await message.channel.send(embed=embed)
