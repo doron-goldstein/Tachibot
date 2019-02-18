@@ -33,6 +33,8 @@ class TachiBoti(discord.Client):
         print("~-~-~-~-~")
 
     async def on_message(self, message):
+        if message.author == self.user:  # Ignore own messages
+            return
         m = self.regex.findall(message.clean_content)
         if m:
             if len(m) > 1:
