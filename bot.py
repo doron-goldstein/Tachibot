@@ -33,12 +33,22 @@ class TachiBoti(discord.Client):
         print("~-~-~-~-~")
 
     async def on_message(self, message):
-        m = self.regex.match(message.clean_content)
+        m = self.regex.findall(message.clean_content)
         if m:
-            embed = await self.format_embed(m.group(1))
-            if not embed:
-                return
-            await message.channel.send(embed=embed)
+            if len(m) > 1:
+                fmt = ""
+                for name in m:
+                    try:
+                        manga = await self.klient.search_manga(name)
+                        fmt += "<" + manga.site_url + ">\n"
+                    except kadal.MediaNotFound:
+                        pass
+                await message.channel.send(fmt)
+            else:
+                embed = await self.format_embed(m.group(1))
+                if not embed:
+                    return
+                await message.channel.send(embed=embed)
 
 
 bot = TachiBoti()
