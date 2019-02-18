@@ -20,7 +20,7 @@ class TachiBoti(discord.Client):
         title = manga.title.get('english') or manga.title.get('romaji') or manga.title.get('native')
         desc = "***" + ", ".join(manga.genres) + "***\n"
         if manga.description is not None:
-            desc += manga.description[:256 - len(desc) - 7] + f"[...]({manga.site_url})"
+            desc += manga.description[:256 - len(desc)] + f"... [(more)]({manga.site_url})"
         e = discord.Embed(title=title, description=desc, color=0x4286f4)
         e.set_thumbnail(url=manga.cover_image)
         e.url = manga.site_url
