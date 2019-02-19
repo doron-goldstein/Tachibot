@@ -13,7 +13,7 @@ class TachiBoti(discord.Client):
 
     async def format_embed(self, name):
         try:
-            manga = await self.klient.search_manga(name)
+            manga = await self.klient.search_manga(name, popularity=True)
         except kadal.MediaNotFound:
             return
 
@@ -41,7 +41,7 @@ class TachiBoti(discord.Client):
                 fmt = ""
                 for name in m:
                     try:
-                        manga = await self.klient.search_manga(name)
+                        manga = await self.klient.search_manga(name, popularity=True)
                         fmt += "<" + manga.site_url + ">\n"
                     except kadal.MediaNotFound:
                         pass
