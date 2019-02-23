@@ -1,2 +1,2 @@
-git+https://github.com/SynderBlack/Kadal.git
+git+https://github.com/SynderBlack/Kadal@620c50829350def7ec41a7db84e1fd068764e47f
 git+https://github.com/Rapptz/discord.py@rewrite
