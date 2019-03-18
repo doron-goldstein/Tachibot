@@ -21,7 +21,7 @@ class TachiBoti(discord.Client):
         desc = "***" + ", ".join(manga.genres) + "***\n"
         if manga.description is not None:
             desc += manga.description[:256 - len(desc)] + f"... [(more)]({manga.site_url})"
-        desc = desc.replace("<br>", "")  # dirty half-fix until i figure something better out
+        desc = desc.replace("<br>", "").replace("<i>", "").replace("</i>", "")  # dirty half-fix until i figure something better out
         e = discord.Embed(title=title, description=desc, color=0x4286f4)
         e.set_thumbnail(url=manga.cover_image)
         e.url = manga.site_url
