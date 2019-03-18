@@ -1,2 +1,2 @@
-git+https://github.com/SynderBlack/Kadal@807dca35062b65a6820ce8e6e93f98f7870bb919
+-e git+https://github.com/SynderBlack/Kadal@807dca35062b65a6820ce8e6e93f98f7870bb919
 git+https://github.com/Rapptz/discord.py@rewrite
