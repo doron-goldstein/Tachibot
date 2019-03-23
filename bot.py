@@ -8,7 +8,7 @@ import kadal
 class TachiBoti(discord.Client):
     def __init__(self):
         super().__init__()
-        self.regex = re.compile(r"<((?!:.*:).*?)>")
+        self.regex = re.compile(r"<((?!https?:\/\/.*)(?!:.*:).*?)>")
         self.klient = kadal.Klient(loop=self.loop)
 
     async def format_embed(self, name):
