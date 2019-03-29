@@ -8,6 +8,7 @@ import kadal
 class TachiBoti(discord.Client):
     def __init__(self):
         super().__init__()
+        self.tachi_id = 349436576037732353
         self.regex = re.compile(r"<((?!https?:\/\/.*)(?!:.*:).*?)>")
         self.klient = kadal.Klient(loop=self.loop)
 
@@ -33,6 +34,20 @@ class TachiBoti(discord.Client):
         print(self.user.id)
         print("~-~-~-~-~")
 
+    async def on_member_join(self, member):
+        if member.guild.id != self.tachi_id:
+            return
+        try:
+            await member.send("""
+                Welcome to Tachiyomi!\n
+                Before asking anything in <#349436576037732355>, please make sure to check the <#403520500443119619> channel, 
+                there's a very high chance you won't even have to ask.\n
+                Most if not all entries in <#403520500443119619> are up to date, 
+                and the channel is updated regularly to reflect the status of extensions and the app in general.
+            """)
+        except discord.errors.Forbidden:  # Can't DM member, give up.
+            pass
+    
     async def on_message(self, message):
         if message.author == self.user:  # Ignore own messages
             return
