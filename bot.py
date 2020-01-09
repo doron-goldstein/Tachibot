@@ -10,8 +10,8 @@ class TachiBoti(discord.Client):
         super().__init__()
         self.manga_regex = re.compile(
             r"(?!`)<((?!https?:\/\/.*)(?!a?:.*:).*?)>(?!`)")
-        self.anime_regex = re.compile(r"{((?!https?:\/\/.*)(?!a?:.*:).*?)}")
-        self.tachi_id = 349436576037732353
+        self.anime_regex = re.compile(
+            r"(?!`){((?!https?:\/\/.*)(?!a?:.*:).*?)}(?!`)")
         self.klient = kadal.Klient(loop=self.loop)
 
     async def format_embed(self, name, anime=False):
@@ -29,7 +29,9 @@ class TachiBoti(discord.Client):
             desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
         # dirty half-fix until i figure something better out
         desc = desc.replace("<br>", "").replace("<i>", "").replace("</i>", "")
+        footer = re.sub(r'.*\.', '', str(media.format))
         e = discord.Embed(title=title, description=desc, color=0x4286f4)
+        e.set_footer(text=footer.replace("TV", "ANIME"))
         e.set_thumbnail(url=media.cover_image)
         e.url = media.site_url
         return e
