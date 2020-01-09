@@ -12,6 +12,7 @@ class TachiBoti(discord.Client):
             r"(?!`)<((?!https?:\/\/.*)(?!a?:.*:).*?)>(?!`)")
         self.anime_regex = re.compile(
             r"(?!`){((?!https?:\/\/.*)(?!a?:.*:).*?)}(?!`)")
+        self.tachi_id = 349436576037732353
         self.klient = kadal.Klient(loop=self.loop)
 
     async def format_embed(self, name, anime=False):
