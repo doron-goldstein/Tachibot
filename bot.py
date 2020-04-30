@@ -8,10 +8,13 @@ import kadal
 class TachiBoti(discord.Client):
     def __init__(self):
         super().__init__()
+        ### Note: this uses an OR regex hack. 
+        ### Full match will match anything, but group 1 will match
+        ### the proper regex.
         self.manga_regex = re.compile(
-            r"(?!`)<((?!https?:\/\/.*)(?!a?:.*:).*?)>(?!`)")
+            r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
         self.anime_regex = re.compile(
-            r"(?!`){((?!https?:\/\/.*)(?!a?:.*:).*?)}(?!`)")
+            r"`[\s\S]*?`|{(.*?)}")
         self.tachi_id = 349436576037732353
         self.klient = kadal.Klient(loop=self.loop)
 
