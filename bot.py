@@ -64,10 +64,11 @@ and the channel is updated regularly to reflect the status of extensions and the
         if message.author == self.user:  # Ignore own messages
             return
         m = self.manga_regex.findall(message.clean_content)
-        if m:
-            if len(m) > 1:
+        m_clean = list(filter(bool, m))
+        if m_clean:
+            if len(m_clean) > 1:
                 fmt = ""
-                for name in m:
+                for name in m_clean:
                     try:
                         manga = await self.klient.search_manga(name, popularity=True)
                         fmt += "<" + manga.site_url + ">\n"
@@ -75,16 +76,17 @@ and the channel is updated regularly to reflect the status of extensions and the
                         pass
                 await message.channel.send(fmt)
             else:
-                embed = await self.format_embed(m[0])
+                embed = await self.format_embed(m_clean[0])
                 if not embed:
                     return
                 await message.channel.send(embed=embed)
 
         a = self.anime_regex.findall(message.clean_content)
-        if a:
-            if len(a) > 1:
+        a_clean = list(filter(bool, a))
+        if a_clean:
+            if len(a_clean) > 1:
                 fmt = ""
-                for name in a:
+                for name in a_clean:
                     try:
                         anime = await self.klient.search_anime(name, popularity=True)
                         fmt += "<" + anime.site_url + ">\n"
@@ -92,7 +94,7 @@ and the channel is updated regularly to reflect the status of extensions and the
                         pass
                 await message.channel.send(fmt)
             else:
-                embed = await self.format_embed(a[0], anime=True)
+                embed = await self.format_embed(a_clean[0], anime=True)
                 if not embed:
                     return
                 await message.channel.send(embed=embed)
