@@ -8,13 +8,11 @@ import kadal
 class TachiBoti(discord.Client):
     def __init__(self):
         super().__init__()
-        ### Note: this uses an OR regex hack. 
-        ### Full match will match anything, but group 1 will match
-        ### the proper regex.
-        self.manga_regex = re.compile(
-            r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
-        self.anime_regex = re.compile(
-            r"`[\s\S]*?`|{(.*?)}")
+        # Note: this uses an OR regex hack.
+        # Full match will match anything, but group 1 will match
+        # the proper regex.
+        self.manga_regex = re.compile(r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
+        self.anime_regex = re.compile(r"`[\s\S]*?`|{(.*?)}")
         self.tachi_id = 349436576037732353
         self.klient = kadal.Klient(loop=self.loop)
 
@@ -27,7 +25,9 @@ class TachiBoti(discord.Client):
         except kadal.MediaNotFound:
             return
 
-        title = media.title.get('english') or media.title.get('romaji') or media.title.get('native')
+        title = (media.title.get('english')
+                 or media.title.get('romaji')
+                 or media.title.get('native'))
         desc = "***" + ", ".join(media.genres) + "***\n"
         if media.description is not None:
             desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
