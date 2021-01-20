@@ -34,7 +34,7 @@ class TachiBoti(discord.Client):
         if media.description is not None:
             desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
         # dirty half-fix until i figure something better out
-        desc = desc.replace("<br>", "").replace("<i>", "").replace("</i>", "")
+        desc = desc.replace("<br>", "").replace("<bR>", "").replace("<Br>", "").replace("<BR>", "").replace("<i>", "").replace("</i>", "").replace("<I>", "").replace("</I>", "")
         footer = re.sub(r".*\.", "", str(media.format))
         title_cover_info = "https://img.anili.st/media/" + str(media.id) 
 
