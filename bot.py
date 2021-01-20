@@ -27,9 +27,9 @@ class TachiBoti(discord.Client):
         except kadal.MediaNotFound:
             return
 
-        title = (media.title.get('english')
-                 or media.title.get('romaji')
-                 or media.title.get('native'))
+        title = (media.title.get("english")
+                 or media.title.get("romaji")
+                 or media.title.get("native"))
         desc = "***" + ", ".join(media.genres) + "***\n"
         if media.description is not None:
             desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
