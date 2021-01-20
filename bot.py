@@ -4,6 +4,8 @@ import re
 import discord
 import kadal
 
+import fast_colorthief
+import urllib.request
 
 class TachiBoti(discord.Client):
     def __init__(self):
@@ -33,10 +35,24 @@ class TachiBoti(discord.Client):
             desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
         # dirty half-fix until i figure something better out
         desc = desc.replace("<br>", "").replace("<i>", "").replace("</i>", "")
-        footer = re.sub(r'.*\.', '', str(media.format))
-        e = discord.Embed(title=title, description=desc, color=0x4286f4)
+        footer = re.sub(r".*\.", "", str(media.format))
+        title_cover_info = "https://img.anili.st/media/" + str(media.id) 
+
+        def title_cover_info_color(title_cover_info=title_cover_info,temp_file="tmp.jpg"):
+
+            opener = urllib.request.build_opener()
+            opener.addheaders = [("User-agent", "Mozilla/5.0")]
+            urllib.request.install_opener(opener)
+            urllib.request.urlretrieve(title_cover_info, temp_file)
+
+            palette_color = fast_colorthief.get_palette(temp_file, color_count=2, quality=100)
+            embed_color = "%02x%02x%02x" % palette_color[1]
+            os.remove(temp_file)
+            return embed_color
+
+        e = discord.Embed(title=title, description=desc, color=int(title_cover_info_color(), 16))
         e.set_footer(text=footer.replace("TV", "ANIME"))
-        e.set_thumbnail(url=media.cover_image)
+        e.set_image(url=title_cover_info)
         e.url = media.site_url
         return e
 
