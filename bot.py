@@ -21,7 +21,6 @@ class TachiBoti(discord.Client):
         self.manga_regex = re.compile(r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
         self.anime_regex = re.compile(r"`[\s\S]*?`|{(.*?)}")
         self.tachi_id = 349436576037732353
-        self.tachi_id = 448601827542302730
         self.klient = kadal.Klient(loop=self.loop)
         print("Starting...")
 
