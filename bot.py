@@ -40,7 +40,7 @@ class TachiBoti(discord.Client):
         footer = re.sub(r".*\.", "", str(media.format))
         title_cover_info = "https://img.anili.st/media/" + str(media.id) 
 
-        def title_cover_info_color(title_cover_info=title_cover_info,temp_file="tmp.jpg"):
+        def title_cover_info_color(title_cover_info=title_cover_info,temp_file="image.tmp"):
 
             opener = urllib.request.build_opener()
             opener.addheaders = [("User-agent", "Mozilla/5.0")]
