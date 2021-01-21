@@ -53,7 +53,6 @@ class TachiBoti(discord.Client):
             return embed_color
 
         e = discord.Embed(title=title, description=desc, color=int(title_cover_info_color(), 16))
-        e.set_footer(text=footer.replace("TV", "ANIME"))
         e.set_footer(text=footer.replace("TV", "ANIME").capitalize())
         e.set_image(url=title_cover_info)
         e.timestamp = parse(str(media.start_date), fuzzy=True)
