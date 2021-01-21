@@ -21,6 +21,7 @@ class TachiBoti(discord.Client):
         self.tachi_id = 349436576037732353
         self.tachi_id = 448601827542302730
         self.klient = kadal.Klient(loop=self.loop)
+        print("Starting...")
 
     async def format_embed(self, name, anime=False):
         try:
@@ -61,10 +62,11 @@ class TachiBoti(discord.Client):
         return e
 
     async def on_ready(self):
+        print("~-~-~-~-~-~-~-~-~-~-~")
+        print(f"Bot: {self.user.name}")
+        print(f"ID: {self.user.id}")
+        print("~-~-~-~-~-~-~-~-~-~-~")
         print("Ready!")
-        print(self.user.name)
-        print(self.user.id)
-        print("~-~-~-~-~")
 
     async def on_member_join(self, member):
         if member.guild.id != self.tachi_id:
