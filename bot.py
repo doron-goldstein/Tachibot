@@ -6,6 +6,8 @@ import kadal
 
 import aiohttp        
 import aiofiles.os
+import asyncio
+import functools
 import fast_colorthief
 
 from dateutil.parser import parse
@@ -50,7 +52,7 @@ class TachiBoti(discord.Client):
                     f = await aiofiles.open("image.tmp", mode='wb')
                     await f.write(await resp.read())
                     await f.close()
-                    palette_color = fast_colorthief.get_palette("image.tmp", color_count=2, quality=100)
+                    palette_color = await asyncio.get_running_loop().run_in_executor(None, functools.partial(fast_colorthief.get_palette, "image.tmp", color_count=2, quality=100))
                     embed_color = "%02x%02x%02x" % palette_color[1]
                     await aiofiles.os.remove("image.tmp")
 
