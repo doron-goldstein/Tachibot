@@ -22,6 +22,7 @@ class TachiBoti(discord.Client):
         self.anime_regex = re.compile(r"`[\s\S]*?`|{(.*?)}")
         self.tachi_id = 349436576037732353
         self.klient = kadal.Klient(loop=self.loop)
+        self.anilist_cover_url = "https://img.anili.st/media/"
         print("Starting...")
 
     async def format_embed(self, name, anime=False):
@@ -43,10 +44,8 @@ class TachiBoti(discord.Client):
         desc = re.sub(r"<[bri/]{1,2}>", "", desc, flags=re.I|re.M)
         footer = re.sub(r".*\.", "", str(media.format))
         
-        title_cover_info = "https://img.anili.st/media/" + str(media.id) 
-
         async with aiohttp.ClientSession() as session:
-            async with session.get(title_cover_info) as resp:
+            async with session.get(f"{self.anilist_cover_url}{media.id}") as resp:
                 if resp.status == 200:
                     f = await aiofiles.open("image.tmp", mode='wb')
                     await f.write(await resp.read())
@@ -57,7 +56,7 @@ class TachiBoti(discord.Client):
 
         e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
         e.set_footer(text=footer.replace("TV", "ANIME").capitalize())
-        e.set_image(url=title_cover_info)
+        e.set_image(url=f"{self.anilist_cover_url}{media.id}")
         e.timestamp = parse(str(media.start_date), fuzzy=True)
         e.url = media.site_url
         return e
