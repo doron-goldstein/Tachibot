@@ -4,8 +4,9 @@ import re
 import discord
 import kadal
 
+import aiohttp        
+import aiofiles.os
 import fast_colorthief
-import urllib.request
 
 from dateutil.parser import parse
 
@@ -18,6 +19,7 @@ class TachiBoti(discord.Client):
         self.manga_regex = re.compile(r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
         self.anime_regex = re.compile(r"`[\s\S]*?`|{(.*?)}")
         self.tachi_id = 349436576037732353
+        self.tachi_id = 448601827542302730
         self.klient = kadal.Klient(loop=self.loop)
 
     async def format_embed(self, name, anime=False):
@@ -38,21 +40,20 @@ class TachiBoti(discord.Client):
         # dirty half-fix until i figure something better out
         desc = re.sub(r"<[bri/]{1,2}>", "", desc, flags=re.I|re.M)
         footer = re.sub(r".*\.", "", str(media.format))
+        
         title_cover_info = "https://img.anili.st/media/" + str(media.id) 
 
-        def title_cover_info_color(title_cover_info=title_cover_info,temp_file="image.tmp"):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(title_cover_info) as resp:
+                if resp.status == 200:
+                    f = await aiofiles.open("image.tmp", mode='wb')
+                    await f.write(await resp.read())
+                    await f.close()
+                    palette_color = fast_colorthief.get_palette("image.tmp", color_count=2, quality=100)
+                    embed_color = "%02x%02x%02x" % palette_color[1]
+                    await aiofiles.os.remove("image.tmp")
 
-            opener = urllib.request.build_opener()
-            opener.addheaders = [("User-agent", "Mozilla/5.0")]
-            urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(title_cover_info, temp_file)
-
-            palette_color = fast_colorthief.get_palette(temp_file, color_count=2, quality=100)
-            embed_color = "%02x%02x%02x" % palette_color[1]
-            os.remove(temp_file)
-            return embed_color
-
-        e = discord.Embed(title=title, description=desc, color=int(title_cover_info_color(), 16))
+        e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
         e.set_footer(text=footer.replace("TV", "ANIME").capitalize())
         e.set_image(url=title_cover_info)
         e.timestamp = parse(str(media.start_date), fuzzy=True)
