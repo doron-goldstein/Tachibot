@@ -1,6 +1,7 @@
 /__pycache__/
 .flake8
 .idea/
-token
 .vscode/
 src/
+image.tmp
+token
