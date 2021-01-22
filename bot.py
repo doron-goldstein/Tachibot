@@ -5,7 +5,7 @@ import discord
 import kadal
 
 import aiohttp        
-import aiofiles.os
+import aiofiles
 import asyncio
 import functools
 import fast_colorthief
