@@ -47,10 +47,11 @@ class TachiBoti(discord.Client):
         async with aiohttp.ClientSession() as session:
             async with session.get(f"{self.anilist_cover_url}{media.id}") as resp:
                 if resp.status == 200:
-                    f = await aiofiles.open("image.tmp", mode='wb')
+                    temp_img = "image.tmp"
+                    f = await aiofiles.open(temp_img, mode='wb')
                     await f.write(await resp.read())
                     await f.close()
-                    palette_color = await asyncio.get_running_loop().run_in_executor(None, functools.partial(fast_colorthief.get_palette, "image.tmp", color_count=2, quality=100))
+                    palette_color = await asyncio.get_running_loop().run_in_executor(None, functools.partial(fast_colorthief.get_palette, temp_img, color_count=2, quality=100))
                     embed_color = "%02x%02x%02x" % palette_color[1]
 
         e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
