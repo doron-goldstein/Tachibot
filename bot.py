@@ -54,7 +54,7 @@ class TachiBoti(discord.Client):
                     embed_color = "%02x%02x%02x" % palette_color[1]
 
         e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
-        e.set_footer(text=footer.replace("TV", "ANIME").capitalize())
+        e.set_footer(text=footer.replace("TV", "ANIME").capitalize(), icon_url="https://anilist.co/img/logo_al.png")
         e.set_image(url=f"{self.anilist_cover_url}{media.id}")
         e.timestamp = parse(str(media.start_date), fuzzy=True)
         e.url = media.site_url
