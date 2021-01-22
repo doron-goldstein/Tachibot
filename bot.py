@@ -23,7 +23,6 @@ class TachiBoti(discord.Client):
         self.tachi_id = 349436576037732353
         self.klient = kadal.Klient(loop=self.loop)
         self.anilist_cover_url = "https://img.anili.st/media/"
-        print("Starting...")
 
     async def format_embed(self, name, anime=False):
         try:
