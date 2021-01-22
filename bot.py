@@ -37,7 +37,7 @@ class TachiBoti(discord.Client):
         title = (media.title.get("english")
                  or media.title.get("romaji")
                  or media.title.get("native"))
-        desc = "***" + ", ".join(media.genres) + "***\n"
+        desc = "**" + ", ".join(media.genres) + "**\n"
         if media.description is not None:
             desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
         # dirty half-fix until i figure something better out
