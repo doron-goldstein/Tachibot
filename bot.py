@@ -7,6 +7,7 @@ import kadal
 import aiohttp        
 import aiofiles
 import asyncio
+import textwrap
 import functools
 import fast_colorthief
 
