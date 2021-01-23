@@ -38,9 +38,14 @@ class TachiBoti(discord.Client):
                  or media.title.get("native"))
         desc = "***" + ", ".join(media.genres) + "***\n"
         if media.description is not None:
-            desc += media.description[:256 - len(desc)] + f"... [(more)]({media.site_url})"
+            desc += textwrap.shorten(media.description, width=256 - len(desc), placeholder="") + f"... [(more)]({media.site_url})"
         # dirty half-fix until i figure something better out
-        desc = re.sub(r"<[bri/]{1,2}>", "", desc, flags=re.I|re.M)
+        replacements = [
+            (r"</?i/?>", ""),
+            (r"</?br/?>", "\n")
+        ]
+        for regex, regex_replace in replacements:
+            desc = re.sub(regex, regex_replace, desc, flags=re.I|re.M)
         footer = re.sub(r".*\.", "", str(media.format))
         
         resp = await self.klient.session.get(f"{self.anilist_cover_url}{media.id}")
