@@ -43,25 +43,24 @@ class TachiBoti(discord.Client):
         desc = re.sub(r"<[bri/]{1,2}>", "", desc, flags=re.I|re.M)
         footer = re.sub(r".*\.", "", str(media.format))
         
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"{self.anilist_cover_url}{media.id}") as resp:
-                if resp.status == 200:
-                    temp_img = "image.tmp"
-                    async with aiofiles.open(temp_img, mode='wb') as f:
-                        await f.write(await resp.read())
-                    palette_partial = functools.partial(
-                        fast_colorthief.get_palette,
-                        temp_img,
-                        color_count=2,
-                        quality=100
-                    )
-                    palette_color = await self.loop.run_in_executor(
-                        None,
-                        palette_partial
-                    )
-                    embed_color = "%02x%02x%02x" % palette_color[1]
-                else:
-                    embed_color = "2F3136"
+        resp = await self.klient.session.get(f"{self.anilist_cover_url}{media.id}")
+        if resp.status == 200:
+            temp_img = "image.tmp"
+            async with aiofiles.open(temp_img, mode='wb') as f:
+                await f.write(await resp.read())
+            palette_partial = functools.partial(
+                fast_colorthief.get_palette,
+                temp_img,
+                color_count=2,
+                quality=100
+            )
+            palette_color = await self.loop.run_in_executor(
+                None,
+                palette_partial
+            )
+            embed_color = "%02x%02x%02x" % palette_color[1]
+        else:
+            embed_color = "2F3136"
 
         e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
         e.set_footer(text=footer.replace("TV", "ANIME").capitalize(), icon_url="https://anilist.co/img/logo_al.png")
