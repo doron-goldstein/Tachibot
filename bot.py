@@ -47,9 +47,8 @@ class TachiBoti(discord.Client):
             async with session.get(f"{self.anilist_cover_url}{media.id}") as resp:
                 if resp.status == 200:
                     temp_img = "image.tmp"
-                    f = await aiofiles.open(temp_img, mode='wb')
-                    await f.write(await resp.read())
-                    await f.close()
+                    async with aiofiles.open(temp_img, mode='wb') as f:
+                        await f.write(await resp.read())
                     palette_partial = functools.partial(
                         fast_colorthief.get_palette,
                         temp_img,
