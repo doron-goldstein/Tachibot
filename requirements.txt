@@ -1,2 +1,3 @@
 -e git+https://github.com/SynderBlack/Kadal.git#egg=kadal
 discord.py
+fast_colorthief
