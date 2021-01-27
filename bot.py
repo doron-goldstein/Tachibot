@@ -4,14 +4,13 @@ import re
 import discord
 import kadal
 
-import aiohttp        
 import aiofiles
-import asyncio
 import textwrap
 import functools
-import fast_colorthief
+from colorthief import ColorThief
 
 from dateutil.parser import parse
+
 
 class TachiBoti(discord.Client):
     def __init__(self):
@@ -46,17 +45,27 @@ class TachiBoti(discord.Client):
             (r"</?br/?>", "\n")
         ]
         for regex, regex_replace in replacements:
-            desc = re.sub(regex, regex_replace, desc, flags=re.I|re.M)
+            desc = re.sub(regex, regex_replace, desc, flags=re.I | re.M)
         footer = re.sub(r".*\.", "", str(media.format))
-        
-        resp = await self.klient.session.get(f"{self.anilist_cover_url}{media.id}")
+
+        embed_color = await self.generate_color(media.id)
+        e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
+        e.set_footer(text=footer.replace("TV", "ANIME").capitalize(), icon_url="https://anilist.co/img/logo_al.png")
+        e.set_image(url=f"{self.anilist_cover_url}{media.id}")
+        if any(media.start_date.values()):
+            e.timestamp = parse(str(media.start_date), fuzzy=True)
+        e.url = media.site_url
+        return e
+
+    async def generate_color(self, id):
+        resp = await self.klient.session.get(f"{self.anilist_cover_url}{id}")
         if resp.status == 200:
             temp_img = "image.tmp"
             async with aiofiles.open(temp_img, mode='wb') as f:
                 await f.write(await resp.read())
+            colorthief = ColorThief(temp_img)
             palette_partial = functools.partial(
-                fast_colorthief.get_palette,
-                temp_img,
+                colorthief.get_palette,
                 color_count=2,
                 quality=100
             )
@@ -64,16 +73,8 @@ class TachiBoti(discord.Client):
                 None,
                 palette_partial
             )
-            embed_color = "%02x%02x%02x" % palette_color[1]
-        else:
-            embed_color = "2F3136"
-
-        e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
-        e.set_footer(text=footer.replace("TV", "ANIME").capitalize(), icon_url="https://anilist.co/img/logo_al.png")
-        e.set_image(url=f"{self.anilist_cover_url}{media.id}")
-        e.timestamp = parse(str(media.start_date), fuzzy=True)
-        e.url = media.site_url
-        return e
+            return "%02x%02x%02x" % palette_color[1]
+        return "2F3136"
 
     async def on_ready(self):
         print("~-~-~-~-~-~-~-~-~-~-~")
@@ -112,10 +113,11 @@ and the channel is updated regularly to reflect the status of extensions and the
                         pass
                 await message.channel.send(fmt)
             else:
-                embed = await self.format_embed(m_clean[0])
-                if not embed:
-                    return
-                await message.channel.send(embed=embed)
+                async with message.channel.typing():
+                    embed = await self.format_embed(m_clean[0])
+                    if not embed:
+                        return
+                    await message.channel.send(embed=embed)
 
         a = self.anime_regex.findall(message.clean_content)
         a_clean = list(filter(bool, a))
@@ -130,10 +132,11 @@ and the channel is updated regularly to reflect the status of extensions and the
                         pass
                 await message.channel.send(fmt)
             else:
-                embed = await self.format_embed(a_clean[0], anime=True)
-                if not embed:
-                    return
-                await message.channel.send(embed=embed)
+                async with message.channel.typing():
+                    embed = await self.format_embed(a_clean[0], anime=True)
+                    if not embed:
+                        return
+                    await message.channel.send(embed=embed)
 
 
 bot = TachiBoti()
