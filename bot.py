@@ -1,13 +1,9 @@
 import os
 import re
+import textwrap
 
 import discord
 import kadal
-
-import aiofiles
-import textwrap
-import functools
-from colorthief import ColorThief
 
 from dateutil.parser import parse
 
@@ -18,18 +14,17 @@ class TachiBoti(discord.Client):
         # Note: this uses an OR regex hack.
         # Full match will match anything, but group 1 will match
         # the proper regex.
-        self.manga_regex = re.compile(r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
-        self.anime_regex = re.compile(r"`[\s\S]*?`|{(.*?)}")
+        self.regex = {
+            "anime": re.compile(r"`[\s\S]*?`|{(.*?)}"),
+            "manga": re.compile(r"<.*?https?:\/\/.*?>|<a?:.+?:\d*>|`[\s\S]*?`|<(.*?)>")
+        }
         self.tachi_id = 349436576037732353
         self.klient = kadal.Klient(loop=self.loop)
         self.anilist_cover_url = "https://img.anili.st/media/"
 
-    async def format_embed(self, name, anime=False):
+    async def format_embed(self, name, media, method):
         try:
-            if anime:
-                media = await self.klient.search_anime(name, popularity=True)
-            else:
-                media = await self.klient.search_manga(name, popularity=True)
+            media = await method(name, popularity=True)
         except kadal.MediaNotFound:
             return
 
@@ -38,7 +33,8 @@ class TachiBoti(discord.Client):
                  or media.title.get("native"))
         desc = "***" + ", ".join(media.genres) + "***\n"
         if media.description is not None:
-            desc += textwrap.shorten(media.description, width=256 - len(desc), placeholder="") + f"... [(more)]({media.site_url})"
+            short_desc = textwrap.shorten(media.description, width=256 - len(desc), placeholder="")
+            desc += f"{short_desc}... [(more)]({media.site_url})"
         # dirty half-fix until i figure something better out
         replacements = [
             (r"</?i/?>", ""),
@@ -48,33 +44,43 @@ class TachiBoti(discord.Client):
             desc = re.sub(regex, regex_replace, desc, flags=re.I | re.M)
         footer = re.sub(r".*\.", "", str(media.format))
 
-        embed_color = await self.generate_color(media.id)
-        e = discord.Embed(title=title, description=desc, color=int(embed_color, 16))
-        e.set_footer(text=footer.replace("TV", "ANIME").capitalize(), icon_url="https://anilist.co/img/logo_al.png")
+        color_hex = media.cover_color or "2F3136"
+        embed_color = int(color_hex.lstrip('#'), 16)
+        e = discord.Embed(title=title, description=desc, color=embed_color)
+        e.set_footer(text=footer.replace("TV", "ANIME").capitalize(),
+                     icon_url="https://anilist.co/img/logo_al.png")
         e.set_image(url=f"{self.anilist_cover_url}{media.id}")
         if any(media.start_date.values()):
             e.timestamp = parse(str(media.start_date), fuzzy=True)
         e.url = media.site_url
         return e
 
-    async def generate_color(self, id):
-        resp = await self.klient.session.get(f"{self.anilist_cover_url}{id}")
-        if resp.status == 200:
-            temp_img = "image.tmp"
-            async with aiofiles.open(temp_img, mode='wb') as f:
-                await f.write(await resp.read())
-            colorthief = ColorThief(temp_img)
-            palette_partial = functools.partial(
-                colorthief.get_palette,
-                color_count=2,
-                quality=100
-            )
-            palette_color = await self.loop.run_in_executor(
-                None,
-                palette_partial
-            )
-            return "%02x%02x%02x" % palette_color[1]
-        return "2F3136"
+    async def search(self, message, regex, media, search_method):
+        m = regex.findall(message.clean_content)
+        m_clean = list(filter(bool, m))
+        if m_clean:
+            if len(m_clean) > 1:
+                fmt = ""
+                for name in m_clean:
+                    try:
+                        media = await search_method(name, popularity=True)
+                        fmt += "<" + media.site_url + ">\n"
+                    except kadal.MediaNotFound:
+                        pass
+                await message.channel.send(fmt)
+            else:
+                async with message.channel.typing():
+                    embed = await self.format_embed(m_clean[0], media, search_method)
+                    if not embed:
+                        return
+                    await message.channel.send(embed=embed)
+
+    async def on_message(self, message):
+        if message.author == self.user:  # Ignore own messages
+            return
+        for media, regex in self.regex.items():
+            method = self.klient.search_anime if media == "anime" else self.klient.search_manga
+            await self.search(message, regex, media, method)
 
     async def on_ready(self):
         print("~-~-~-~-~-~-~-~-~-~-~")
@@ -93,50 +99,9 @@ Before asking anything in <#349436576037732355>, please make sure to check the <
 there's a very high chance you won't even have to ask.
 Most if not all entries in <#403520500443119619> are up to date, \
 and the channel is updated regularly to reflect the status of extensions and the app in general.
-            """)
+            """)  # noqa
         except discord.errors.Forbidden:  # Can't DM member, give up.
             pass
-
-    async def on_message(self, message):
-        if message.author == self.user:  # Ignore own messages
-            return
-        m = self.manga_regex.findall(message.clean_content)
-        m_clean = list(filter(bool, m))
-        if m_clean:
-            if len(m_clean) > 1:
-                fmt = ""
-                for name in m_clean:
-                    try:
-                        manga = await self.klient.search_manga(name, popularity=True)
-                        fmt += "<" + manga.site_url + ">\n"
-                    except kadal.MediaNotFound:
-                        pass
-                await message.channel.send(fmt)
-            else:
-                async with message.channel.typing():
-                    embed = await self.format_embed(m_clean[0])
-                    if not embed:
-                        return
-                    await message.channel.send(embed=embed)
-
-        a = self.anime_regex.findall(message.clean_content)
-        a_clean = list(filter(bool, a))
-        if a_clean:
-            if len(a_clean) > 1:
-                fmt = ""
-                for name in a_clean:
-                    try:
-                        anime = await self.klient.search_anime(name, popularity=True)
-                        fmt += "<" + anime.site_url + ">\n"
-                    except kadal.MediaNotFound:
-                        pass
-                await message.channel.send(fmt)
-            else:
-                async with message.channel.typing():
-                    embed = await self.format_embed(a_clean[0], anime=True)
-                    if not embed:
-                        return
-                    await message.channel.send(embed=embed)
 
 
 bot = TachiBoti()
