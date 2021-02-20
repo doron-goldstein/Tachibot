@@ -22,9 +22,9 @@ class TachiBoti(discord.Client):
         self.klient = kadal.Klient(loop=self.loop)
         self.anilist_cover_url = "https://img.anili.st/media/"
 
-    async def format_embed(self, name, media, method):
+    async def format_embed(self, name, media, method, *, allow_adult):
         try:
-            media = await method(name, popularity=True)
+            media = await method(name, popularity=True, allow_adult=allow_adult)
         except kadal.MediaNotFound:
             return
 
@@ -55,7 +55,7 @@ class TachiBoti(discord.Client):
         e.url = media.site_url
         return e
 
-    async def search(self, message, regex, media, search_method):
+    async def search(self, message, regex, media, search_method, *, allow_adult):
         m = regex.findall(message.clean_content)
         m_clean = list(filter(bool, m))
         if m_clean:
@@ -63,14 +63,14 @@ class TachiBoti(discord.Client):
                 fmt = ""
                 for name in m_clean:
                     try:
-                        media = await search_method(name, popularity=True)
+                        media = await search_method(name, popularity=True, allow_adult=allow_adult)
                         fmt += "<" + media.site_url + ">\n"
                     except kadal.MediaNotFound:
                         pass
                 await message.channel.send(fmt)
             else:
                 async with message.channel.typing():
-                    embed = await self.format_embed(m_clean[0], media, search_method)
+                    embed = await self.format_embed(m_clean[0], media, search_method, allow_adult=allow_adult)
                     if not embed:
                         return
                     await message.channel.send(embed=embed)
@@ -80,7 +80,7 @@ class TachiBoti(discord.Client):
             return
         for media, regex in self.regex.items():
             method = self.klient.search_anime if media == "anime" else self.klient.search_manga
-            await self.search(message, regex, media, method)
+            await self.search(message, regex, media, method, allow_adult=message.channel.is_nsfw())
 
     async def on_ready(self):
         print("~-~-~-~-~-~-~-~-~-~-~")
