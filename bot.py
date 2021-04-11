@@ -22,15 +22,18 @@ class TachiBoti(discord.Client):
         self.klient = kadal.Klient(loop=self.loop)
         self.anilist_cover_url = "https://img.anili.st/media/"
 
+    @staticmethod
+    def get_title(media):
+        return (media.title.get("english")
+                or media.title.get("romaji")
+                or media.title.get("native"))
+
     async def format_embed(self, name, media, method, *, allow_adult):
         try:
             media = await method(name, popularity=True, allow_adult=allow_adult)
         except kadal.MediaNotFound:
             return
 
-        title = (media.title.get("english")
-                 or media.title.get("romaji")
-                 or media.title.get("native"))
         desc = "***" + ", ".join(media.genres) + "***\n"
         if media.description is not None:
             short_desc = textwrap.shorten(media.description, width=256 - len(desc), placeholder="")
@@ -46,6 +49,7 @@ class TachiBoti(discord.Client):
 
         color_hex = media.cover_color or "2F3136"
         embed_color = int(color_hex.lstrip('#'), 16)
+        title = self.get_title(media)
         e = discord.Embed(title=title, description=desc, color=embed_color)
         e.set_footer(text=footer.replace("TV", "ANIME").capitalize(),
                      icon_url="https://anilist.co/img/logo_al.png")
@@ -59,21 +63,24 @@ class TachiBoti(discord.Client):
         m = regex.findall(message.clean_content)
         m_clean = list(filter(bool, m))
         if m_clean:
-            if len(m_clean) > 1:
-                fmt = ""
-                for name in m_clean:
-                    try:
-                        media = await search_method(name, popularity=True, allow_adult=allow_adult)
-                        fmt += "<" + media.site_url + ">\n"
-                    except kadal.MediaNotFound:
-                        pass
-                await message.channel.send(fmt)
-            else:
-                async with message.channel.typing():
+            async with message.channel.typing():
+                embed = discord.Embed()
+                if len(m_clean) > 1:
+                    fmt = ""
+                    for name in m_clean:
+                        try:
+                            media = await search_method(name, popularity=True, allow_adult=allow_adult)
+                            title = self.get_title(media)
+                            fmt += f"[**{title}**]({media.site_url})\n"
+                        except kadal.MediaNotFound:
+                            pass
+                    embed.description = fmt
+                    embed.color = discord.Color(0x2f3136)
+                else:
                     embed = await self.format_embed(m_clean[0], media, search_method, allow_adult=allow_adult)
                     if not embed:
                         return
-                    await message.channel.send(embed=embed)
+                await message.channel.send(embed=embed)
 
     async def on_message(self, message):
         if message.author == self.user:  # Ignore own messages
