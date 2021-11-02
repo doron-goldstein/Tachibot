@@ -47,7 +47,7 @@ class TachiBoti(discord.Client):
             desc = re.sub(regex, regex_replace, desc, flags=re.I | re.M)
         footer = re.sub(r".*\.", "", str(media.format))
         footer_text = footer.replace("TV", "ANIME").capitalize()
-        status = str(media.status)
+        status = re.sub(r".*\.", "", str(media.status))
 
         color_hex = media.cover_color or "2F3136"
         embed_color = int(color_hex.lstrip('#'), 16)
