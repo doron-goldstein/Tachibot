@@ -46,12 +46,15 @@ class TachiBoti(discord.Client):
         for regex, regex_replace in replacements:
             desc = re.sub(regex, regex_replace, desc, flags=re.I | re.M)
         footer = re.sub(r".*\.", "", str(media.format))
+        footer_text = footer.replace("TV", "ANIME").capitalize()
+        status = re.sub(r".*\.", "", str(media.status))
+        status_text = status.replace("_", " ").capitalize()
 
         color_hex = media.cover_color or "2F3136"
         embed_color = int(color_hex.lstrip('#'), 16)
         title = self.get_title(media)
         e = discord.Embed(title=title, description=desc, color=embed_color)
-        e.set_footer(text=footer.replace("TV", "ANIME").capitalize(),
+        e.set_footer(text=f"{footer_text} • {status_text}",
                      icon_url="https://anilist.co/img/logo_al.png")
         e.set_image(url=f"{self.anilist_cover_url}{media.id}")
         if any(media.start_date.values()):
