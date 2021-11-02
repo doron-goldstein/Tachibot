@@ -48,12 +48,13 @@ class TachiBoti(discord.Client):
         footer = re.sub(r".*\.", "", str(media.format))
         footer_text = footer.replace("TV", "ANIME").capitalize()
         status = re.sub(r".*\.", "", str(media.status))
+        status_text = status.replace("NOT_YET_RELEASED", "N/A").capitalize()
 
         color_hex = media.cover_color or "2F3136"
         embed_color = int(color_hex.lstrip('#'), 16)
         title = self.get_title(media)
         e = discord.Embed(title=title, description=desc, color=embed_color)
-        e.set_footer(text=f"{footer_text}•{status}",
+        e.set_footer(text=f"{footer_text} • {status_text}",
                      icon_url="https://anilist.co/img/logo_al.png")
         e.set_image(url=f"{self.anilist_cover_url}{media.id}")
         if any(media.start_date.values()):
