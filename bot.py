@@ -86,6 +86,8 @@ class TachiBoti(discord.Client):
                 await message.channel.send(embed=embed)
 
     async def on_message(self, message):
+        if message.author.bot: # Ignore other bots messages
+            return
         if message.author == self.user:  # Ignore own messages
             return
         for media, regex in self.regex.items():
