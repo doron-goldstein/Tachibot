@@ -1,5 +1,6 @@
 import os
 import re
+import html
 import textwrap
 
 import discord
@@ -44,7 +45,7 @@ class TachiBoti(discord.Client):
             (r"</?br/?>", "\n")
         ]
         for regex, regex_replace in replacements:
-            desc = re.sub(regex, regex_replace, desc, flags=re.I | re.M)
+            desc = html.unescape(re.sub(regex, regex_replace, desc, flags=re.I | re.M))
         footer = re.sub(r".*\.", "", str(media.format))
         footer_text = footer.replace("TV", "ANIME").capitalize()
         status = re.sub(r".*\.", "", str(media.status))
